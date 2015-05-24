@@ -24,6 +24,8 @@ function read_global_config() {
 }
 
 function pre_process() {
+    set +e
+
     local retval=0
 
     if [ "${pre_process_cmdline}" != "" ]; then
@@ -35,6 +37,8 @@ function pre_process() {
         echo "pre_process command returns ${retval}"
         exit 1
     fi
+
+    set -e
 }
 
 function _pre_detect() {
@@ -160,6 +164,8 @@ function run_servers_tasks() {
 }
 
 function post_process() {
+    set +e
+
     local retval=0
 
     if [ "${post_process_cmdline}" != "" ]; then
@@ -171,6 +177,8 @@ function post_process() {
         echo "post_process command returns ${retval}"
         exit 1
     fi
+
+    set -e
 }
 
 function exe_update() {
