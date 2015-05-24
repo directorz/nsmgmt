@@ -47,9 +47,9 @@ function _pre_detect() {
     [ -f ${STATUS_TMP_PATH} ] || touch ${STATUS_TMP_PATH}
     [ -d ${ZONES_TMP_DIR} ] || mkdir -p ${ZONES_TMP_DIR}
 
-    (cd ${ZONES_TMP_DIR} && rm -f *)
-    (cd ${zones_src_path} && find . -type f | xargs -n 200 -i cp -a {} ${ZONES_TMP_DIR})
-    (cd ${ZONES_TMP_DIR} && ls | xargs -n 200 sha256sum | awk '{print $2":"$1}') > ${STATUS_TMP_PATH}
+    (cd ${ZONES_TMP_DIR} && ls | xargs -P 5 -n 1000 -i rm -f {})
+    (cd ${zones_src_path} && find . -type f | xargs -P 5 -n 1000 -i cp -a {} ${ZONES_TMP_DIR})
+    (cd ${ZONES_TMP_DIR} && ls | xargs -P 5 -n 1000 -i sha256sum {} | awk '{print $2":"$1}') > ${STATUS_TMP_PATH}
 }
 
 function detect_added_zones() {
