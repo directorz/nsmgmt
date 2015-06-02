@@ -107,21 +107,20 @@ function detect_changed_zones() {
 }
 
 function update_added_zones() {
-    local n
-    n=${#ADDED_ZONES[@]}
-    n=$((n - 1))
+    local i=0
+    local len=${#ADDED_ZONES[@]}
 
     cd ${ZONES_TMP_DIR}
 
     if [ ${update_serial} -eq 1 ]; then
-        while [ ${n} -ge 0 ]; do
-            cat ${ADDED_ZONES[${n}]} | eval "${update_serial_cmdline}" > ${zones_dst_path}/${ADDED_ZONES[${n}]}
-            n=$((n - 1))
+        while [ ${i} -lt ${len} ]; do
+            cat ${ADDED_ZONES[${i}]} | eval "${update_serial_cmdline}" > ${zones_dst_path}/${ADDED_ZONES[${i}]}
+            i=$((i + 1))
         done
     else
-        while [ ${n} -ge 0 ]; do
-            cat ${ADDED_ZONES[${n}]} > ${zones_dst_path}/${ADDED_ZONES[${n}]}
-            n=$((n - 1))
+        while [ ${i} -lt ${len} ]; do
+            cat ${ADDED_ZONES[${i}]} > ${zones_dst_path}/${ADDED_ZONES[${i}]}
+            i=$((i + 1))
         done
     fi
 
@@ -131,33 +130,31 @@ function update_added_zones() {
 }
 
 function update_deleted_zones() {
-    local n
-    n=${#DELETED_ZONES[@]}
-    n=$((n - 1))
-    while [ ${n} -ge 0 ]; do
-        rm -f ${zones_dst_path}/${DELETED_ZONES[${n}]} || :
-        n=$((n - 1))
+    local i=0
+    local len=${#DELETED_ZONES[@]}
+    while [ ${i} -lt ${len} ]; do
+        rm -f ${zones_dst_path}/${DELETED_ZONES[${i}]} || :
+        i=$((i + 1))
     done
 
     NEED_UPDATE=1
 }
 
 function update_changed_zones() {
-    local n
-    n=${#CHANGED_ZONES[@]}
-    n=$((n - 1))
+    local i=0
+    local len=${#CHANGED_ZONES[@]}
 
     cd ${ZONES_TMP_DIR}
 
     if [ ${update_serial} -eq 1 ]; then
-        while [ ${n} -ge 0 ]; do
-            cat ${CHANGED_ZONES[${n}]} | eval "${update_serial_cmdline}" > ${zones_dst_path}/${CHANGED_ZONES[${n}]}
-            n=$((n - 1))
+        while [ ${i} -lt ${len} ]; do
+            cat ${CHANGED_ZONES[${i}]} | eval "${update_serial_cmdline}" > ${zones_dst_path}/${CHANGED_ZONES[${i}]}
+            i=$((i + 1))
         done
     else
-        while [ ${n} -ge 0 ]; do
-            cat ${CHANGED_ZONES[${n}]} > ${zones_dst_path}/${CHANGED_ZONES[${n}]}
-            n=$((n - 1))
+        while [ ${i} -lt ${len} ]; do
+            cat ${CHANGED_ZONES[${i}]} > ${zones_dst_path}/${CHANGED_ZONES[${i}]}
+            i=$((i + 1))
         done
     fi
 
