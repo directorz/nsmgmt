@@ -138,7 +138,7 @@ function update_changed_zones() {
 
     if [ ${update_serial} -eq 1 ]; then
         while [ ${n} -ge 0 ]; do
-            cat ${CHANGED_ZONES[${n}]} | ${update_serial_cmdline} > ${zones_dst_path}/${CHANGED_ZONES[${n}]}
+            cat ${CHANGED_ZONES[${n}]} | eval "${update_serial_cmdline}" > ${zones_dst_path}/${CHANGED_ZONES[${n}]}
             n=$((n - 1))
         done
     else
