@@ -109,6 +109,7 @@ function detect_changed_zones() {
 function update_added_zones() {
     local i=0
     local len=${#ADDED_ZONES[@]}
+    [ ${len} -gt 0 ] && NEED_UPDATE=1
 
     cd ${ZONES_TMP_DIR}
 
@@ -125,24 +126,23 @@ function update_added_zones() {
     fi
 
     cd - >/dev/null 2>&1
-
-    NEED_UPDATE=1
 }
 
 function update_deleted_zones() {
     local i=0
     local len=${#DELETED_ZONES[@]}
+    [ ${len} -gt 0 ] && NEED_UPDATE=1
+
     while [ ${i} -lt ${len} ]; do
         rm -f ${zones_dst_path}/${DELETED_ZONES[${i}]} || :
         i=$((i + 1))
     done
-
-    NEED_UPDATE=1
 }
 
 function update_changed_zones() {
     local i=0
     local len=${#CHANGED_ZONES[@]}
+    [ ${len} -gt 0 ] && NEED_UPDATE=1
 
     cd ${ZONES_TMP_DIR}
 
@@ -159,8 +159,6 @@ function update_changed_zones() {
     fi
 
     cd - >/dev/null 2>&1
-
-    NEED_UPDATE=1
 }
 
 function save_zones_state() {
