@@ -152,7 +152,7 @@ function update_changed_zones() {
 }
 
 function save_zones_state() {
-    (cd ${ZONES_TMP_DIR} && ls | xargs -n 1000 sha256sum | awk '{print $2":"$1}') > ${STATUS_PATH}
+    (cd ${ZONES_TMP_DIR} && ls | xargs -P 5 -n 1000 -i sha256sum {} | awk '{print $2":"$1}') > ${STATUS_PATH}
     rm -f ${STATUS_TMP_PATH}
 }
 
