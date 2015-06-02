@@ -12,6 +12,7 @@ ZONES_TMP_DIR=${DB_DIR}/zones
 declare -a ADDED_ZONES
 declare -a DELETED_ZONES
 declare -a CHANGED_ZONES
+declare NEED_UPDATE=0
 
 function read_global_config() {
     cd ${ETC_DIR}
@@ -21,6 +22,14 @@ function read_global_config() {
     zones_dst_path=$(cd ${zones_dst_path:?} && pwd)
     update_serial=${update_serial:=1}
     update_serial_cmdline=${update_serial_cmdline:="cat"}
+
+    local i=0
+    local len=${#servers_tasks[@]}
+    [ ${len} -eq 0 ] && servers_tasks=()
+    while [ ${i} -lt ${len} ]; do
+        servers_tasks[${i}]=$(readlink -f ${servers_tasks[${i}]})
+        i=$((i + 1))
+    done
 }
 
 function pre_process() {
@@ -117,6 +126,8 @@ function update_added_zones() {
     fi
 
     cd - >/dev/null 2>&1
+
+    NEED_UPDATE=1
 }
 
 function update_deleted_zones() {
@@ -127,6 +138,8 @@ function update_deleted_zones() {
         rm -f ${zones_dst_path}/${DELETED_ZONES[${n}]} || :
         n=$((n - 1))
     done
+
+    NEED_UPDATE=1
 }
 
 function update_changed_zones() {
@@ -149,18 +162,47 @@ function update_changed_zones() {
     fi
 
     cd - >/dev/null 2>&1
+
+    NEED_UPDATE=1
 }
 
 function save_zones_state() {
+    [ ${NEED_UPDATE} -eq 0 ] && return 0
+
     (cd ${ZONES_TMP_DIR} && ls | xargs -P 5 -n 1000 -i sha256sum {} | awk '{print $2":"$1}') > ${STATUS_PATH}
     rm -f ${STATUS_TMP_PATH}
 }
 
 function run_servers_tasks() {
-    #generate_config
-    #sync_config
-    #reload_ns
-    :
+    [ ${NEED_UPDATE} -eq 0 ] && return 0
+
+    local i=0
+    local len=${#servers_tasks[@]}
+    while [ ${i} -lt ${len} ]; do
+        . ${servers_tasks[${i}]}
+
+        set +e
+
+        if type generate_config >/dev/null 2>&1; then
+            generate_config ${zones_dst_path}
+        fi
+
+        if type sync_config >/dev/null 2>&1; then
+            sync_config ${zones_dst_path}
+        fi
+
+        if type reload_ns >/dev/null 2>&1; then
+            reload_ns
+        fi
+
+        unset -f generate_config
+        unset -f sync_config
+        unset -f reload_ns
+
+        set -e
+
+        i=$((i + 1))
+    done
 }
 
 function post_process() {
@@ -200,10 +242,24 @@ function exe_update() {
     post_process
 }
 
+function exe_servers() {
+    read_global_config
+
+    pre_process
+
+    NEED_UPDATE=1
+    run_servers_tasks
+
+    post_process
+}
+
 command="${1}"
 case "${command}" in
     "update" )
         exe_update
+        ;;
+    "servers" )
+        exe_servers
         ;;
     "-v" )
         ${LIB_DIR}/nsmgmt-version.sh
