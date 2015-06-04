@@ -1,0 +1,13 @@
+zones_src_path=/home/dns/zones_input
+zones_dst_path=/home/dns/zones_output
+
+update_serial=1
+update_serial_cmdline="ldns-read-zone -S 0 | ldns-read-zone -S unixtime"
+
+servers_tasks=(
+    "/path/to/primary.sh"
+    "/path/to/secondary.sh"
+)
+
+pre_process_cmdline=""
+post_process_cmdline=""
