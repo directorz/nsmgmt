@@ -18,6 +18,7 @@ function read_global_config() {
     exec 1> >(awk '{print strftime("[%Y/%m/%d %H:%M:%S]"),$0;fflush()}')
 
     cd ${ETC_DIR}
+
     . nsmgmt.conf
 
     zones_src_path=$(cd ${zones_src_path:?} && pwd)
@@ -27,11 +28,17 @@ function read_global_config() {
 
     local i=0
     local len=${#servers_tasks[@]}
-    [ ${len} -eq 0 ] && servers_tasks=()
+
+    if [ ${len} -eq 0 ]; then
+        servers_tasks=()
+    fi
+
     while [ ${i} -lt ${len} ]; do
         servers_tasks[${i}]=$(readlink -f ${servers_tasks[${i}]})
         i=$((i + 1))
     done
+
+    cd - >/dev/null 2>&1
 }
 
 function pre_process() {
@@ -126,7 +133,9 @@ function detect_changed_zones() {
 function update_added_zones() {
     local i=0
     local len=${#ADDED_ZONES[@]}
-    [ ${len} -gt 0 ] && NEED_UPDATE=1
+    if [ ${len} -gt 0 ]; then
+        NEED_UPDATE=1
+    fi
 
     cd ${ZONES_TMP_DIR}
 
@@ -148,7 +157,9 @@ function update_added_zones() {
 function update_deleted_zones() {
     local i=0
     local len=${#DELETED_ZONES[@]}
-    [ ${len} -gt 0 ] && NEED_UPDATE=1
+    if [ ${len} -gt 0 ]; then
+        NEED_UPDATE=1
+    fi
 
     while [ ${i} -lt ${len} ]; do
         rm -f ${zones_dst_path}/${DELETED_ZONES[${i}]} || :
@@ -159,7 +170,9 @@ function update_deleted_zones() {
 function update_changed_zones() {
     local i=0
     local len=${#CHANGED_ZONES[@]}
-    [ ${len} -gt 0 ] && NEED_UPDATE=1
+    if [ ${len} -gt 0 ]; then
+        NEED_UPDATE=1
+    fi
 
     cd ${ZONES_TMP_DIR}
 
@@ -179,7 +192,9 @@ function update_changed_zones() {
 }
 
 function save_zones_state() {
-    [ ${NEED_UPDATE} -eq 0 ] && return 0
+    if [ ${NEED_UPDATE} -eq 0 ]; then
+        return 0
+    fi
 
     (cd ${ZONES_TMP_DIR} && ls | xargs sha256sum | awk '{print $2":"$1}') > ${STATUS_PATH}
     rm -f ${STATUS_TMP_PATH}
