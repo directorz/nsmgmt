@@ -259,7 +259,7 @@ function post_process() {
     set -e
 }
 
-function exe_update() {
+function exe_all() {
     read_global_config
 
     pre_process
@@ -278,6 +278,23 @@ function exe_update() {
     post_process
 }
 
+function exe_update() {
+    read_global_config
+
+    pre_process
+
+    _pre_detect
+    detect_added_zones
+    detect_deleted_zones
+    detect_changed_zones
+    update_added_zones
+    update_deleted_zones
+    update_changed_zones
+    save_zones_state
+
+    post_process
+}
+
 function exe_servers() {
     read_global_config
 
@@ -291,6 +308,9 @@ function exe_servers() {
 
 command="${1}"
 case "${command}" in
+    "all" )
+        exe_all
+        ;;
     "update" )
         exe_update
         ;;
