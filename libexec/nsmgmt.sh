@@ -15,6 +15,8 @@ declare -a CHANGED_ZONES
 declare NEED_UPDATE=0
 
 function read_global_config() {
+    exec 1> >(awk '{print strftime("[%Y/%m/%d %H:%M:%S]"),$0;fflush()}')
+
     cd ${ETC_DIR}
     . nsmgmt.conf
 
@@ -38,6 +40,7 @@ function pre_process() {
     local retval=0
 
     if [ "${pre_process_cmdline}" != "" ]; then
+        echo "running pre_process..."
         eval "${pre_process_cmdline}"
         retval=$?
     fi
@@ -59,6 +62,8 @@ function _pre_detect() {
     (cd ${ZONES_TMP_DIR} && find . -type f | xargs rm -f)
     (cd ${zones_src_path} && find . -type f | xargs cp -a -t ${ZONES_TMP_DIR})
     (cd ${ZONES_TMP_DIR} && ls | xargs sha256sum | awk '{print $2":"$1}') > ${STATUS_TMP_PATH}
+
+    echo "detecting added/deleted/changed zones..."
 }
 
 function detect_added_zones() {
@@ -66,6 +71,10 @@ function detect_added_zones() {
     while read zone; do
         ADDED_ZONES+=("${zone}")
     done < <(comm -23 <(cut -d':' -f1 ${STATUS_TMP_PATH} | sort) <(cut -d':' -f1 ${STATUS_PATH} | sort))
+
+    if [ ${#ADDED_ZONES[@]} -gt 0 ]; then
+        echo "added: ${ADDED_ZONES[@]}"
+    fi
 }
 
 function detect_deleted_zones() {
@@ -73,6 +82,10 @@ function detect_deleted_zones() {
     while read zone; do
         DELETED_ZONES+=("${zone}")
     done < <(comm -13 <(cut -d':' -f1 ${STATUS_TMP_PATH} | sort) <(cut -d':' -f1 ${STATUS_PATH} | sort))
+
+    if [ ${#DELETED_ZONES[@]} -gt 0 ]; then
+        echo "deleted: ${DELETED_ZONES[@]}"
+    fi
 }
 
 function detect_changed_zones() {
@@ -104,6 +117,10 @@ function detect_changed_zones() {
             CHANGED_ZONES+=("${zone}")
         fi
     done < <(comm -12 <(cut -d':' -f1 ${STATUS_TMP_PATH} | sort) <(cut -d':' -f1 ${STATUS_PATH} | sort))
+
+    if [ ${#CHANGED_ZONES[@]} -gt 0 ]; then
+        echo "changed: ${CHANGED_ZONES[@]}"
+    fi
 }
 
 function update_added_zones() {
@@ -169,7 +186,12 @@ function save_zones_state() {
 }
 
 function run_servers_tasks() {
-    [ ${NEED_UPDATE} -eq 0 ] && return 0
+    if [ ${NEED_UPDATE} -eq 0 ]; then
+        echo "zones have not been changed"
+        return 0
+    else
+        echo "running servers tasks..."
+    fi
 
     local i=0
     local len=${#servers_tasks[@]}
@@ -179,14 +201,17 @@ function run_servers_tasks() {
         set +e
 
         if type generate_config >/dev/null 2>&1; then
+            echo "[$((i + 1))] running generate_config..."
             generate_config ${zones_dst_path}
         fi
 
         if type sync_config >/dev/null 2>&1; then
+            echo "[$((i + 1))] running sync_config..."
             sync_config ${zones_dst_path}
         fi
 
         if type reload_ns >/dev/null 2>&1; then
+            echo "[$((i + 1))] running reload_ns..."
             reload_ns
         fi
 
@@ -206,6 +231,7 @@ function post_process() {
     local retval=0
 
     if [ "${post_process_cmdline}" != "" ]; then
+        echo "running post_process..."
         eval "${post_process_cmdline}"
         retval=$?
     fi
