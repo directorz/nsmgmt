@@ -56,9 +56,9 @@ function _pre_detect() {
     [ -f ${STATUS_TMP_PATH} ] || touch ${STATUS_TMP_PATH}
     [ -d ${ZONES_TMP_DIR} ] || mkdir -p ${ZONES_TMP_DIR}
 
-    (cd ${ZONES_TMP_DIR} && ls | xargs -P 5 -n 1000 -i rm -f {})
-    (cd ${zones_src_path} && find . -type f | xargs -P 5 -n 1000 -i cp -a {} ${ZONES_TMP_DIR})
-    (cd ${ZONES_TMP_DIR} && ls | xargs -P 5 -n 1000 -i sha256sum {} | awk '{print $2":"$1}') > ${STATUS_TMP_PATH}
+    (cd ${ZONES_TMP_DIR} && find . -type f | xargs rm -f)
+    (cd ${zones_src_path} && find . -type f | xargs cp -a -t ${ZONES_TMP_DIR})
+    (cd ${ZONES_TMP_DIR} && ls | xargs sha256sum | awk '{print $2":"$1}') > ${STATUS_TMP_PATH}
 }
 
 function detect_added_zones() {
@@ -164,7 +164,7 @@ function update_changed_zones() {
 function save_zones_state() {
     [ ${NEED_UPDATE} -eq 0 ] && return 0
 
-    (cd ${ZONES_TMP_DIR} && ls | xargs -P 5 -n 1000 -i sha256sum {} | awk '{print $2":"$1}') > ${STATUS_PATH}
+    (cd ${ZONES_TMP_DIR} && ls | xargs sha256sum | awk '{print $2":"$1}') > ${STATUS_PATH}
     rm -f ${STATUS_TMP_PATH}
 }
 
