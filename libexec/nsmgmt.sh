@@ -38,7 +38,7 @@ function read_global_config() {
         i=$((i + 1))
     done
 
-    cd - >/dev/null 2>&1
+    cd - >/dev/null
 }
 
 function pre_process() {
@@ -151,7 +151,7 @@ function update_added_zones() {
         done
     fi
 
-    cd - >/dev/null 2>&1
+    cd - >/dev/null
 }
 
 function update_deleted_zones() {
@@ -188,7 +188,7 @@ function update_changed_zones() {
         done
     fi
 
-    cd - >/dev/null 2>&1
+    cd - >/dev/null
 }
 
 function save_zones_state() {
