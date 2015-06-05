@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-BIN_DIR=$(cd ${BASH_SOURCE[0]%/*} && pwd)
-LIB_DIR=${BIN_DIR}/../libexec
-ETC_DIR=${BIN_DIR}/../etc
-DB_DIR=${BIN_DIR}/../var/db/nsmgmt
-STATUS_PATH=${DB_DIR}/zones.status
-STATUS_TMP_PATH=${DB_DIR}/zones.status.tmp
-ZONES_TMP_DIR=${DB_DIR}/zones
+readonly BIN_DIR=$(cd ${BASH_SOURCE[0]%/*} && pwd)
+readonly LIB_DIR=${BIN_DIR}/../libexec
+readonly ETC_DIR=${BIN_DIR}/../etc
+readonly DB_DIR=${BIN_DIR}/../var/db/nsmgmt
+readonly STATUS_PATH=${DB_DIR}/zones.status
+readonly STATUS_TMP_PATH=${DB_DIR}/zones.status.tmp
+readonly ZONES_TMP_DIR=${DB_DIR}/zones
 
 declare -a ADDED_ZONES
 declare -a DELETED_ZONES
