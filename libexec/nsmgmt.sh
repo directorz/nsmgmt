@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
-BIN_DIR=$(cd ${BASH_SOURCE[0]%/*} && pwd)
-LIB_DIR=${BIN_DIR}/../libexec
-ETC_DIR=${BIN_DIR}/../etc
-DB_DIR=${BIN_DIR}/../var/db/nsmgmt
-STATUS_PATH=${DB_DIR}/zones.status
-STATUS_TMP_PATH=${DB_DIR}/zones.status.tmp
-ZONES_TMP_DIR=${DB_DIR}/zones
+readonly BIN_DIR=$(cd ${BASH_SOURCE[0]%/*} && pwd)
+readonly LIB_DIR=${BIN_DIR}/../libexec
+readonly DB_DIR=${BIN_DIR}/../var/db/nsmgmt
+readonly STATUS_PATH=${DB_DIR}/zones.status
+readonly STATUS_TMP_PATH=${DB_DIR}/zones.status.tmp
+readonly ZONES_TMP_DIR=${DB_DIR}/zones
+
+declare CONFIG_PATH=${BIN_DIR}/../etc/nsmgmt.conf
 
 declare -a ADDED_ZONES
 declare -a DELETED_ZONES
@@ -17,9 +18,10 @@ declare NEED_UPDATE=0
 function read_global_config() {
     exec 1> >(awk '{print strftime("[%Y/%m/%d %H:%M:%S]"),$0;fflush()}')
 
-    cd ${ETC_DIR}
+    local OLDPWD=$(pwd)
 
-    . nsmgmt.conf
+    cd $(dirname ${CONFIG_PATH})
+    . $(basename ${CONFIG_PATH})
 
     zones_src_path=$(cd ${zones_src_path:?} && pwd)
     zones_dst_path=$(cd ${zones_dst_path:?} && pwd)
@@ -38,7 +40,7 @@ function read_global_config() {
         i=$((i + 1))
     done
 
-    cd - >/dev/null 2>&1
+    cd ${OLDPWD}
 }
 
 function pre_process() {
@@ -66,9 +68,9 @@ function _pre_detect() {
     [ -f ${STATUS_TMP_PATH} ] || touch ${STATUS_TMP_PATH}
     [ -d ${ZONES_TMP_DIR} ] || mkdir -p ${ZONES_TMP_DIR}
 
-    (cd ${ZONES_TMP_DIR} && find . -type f | xargs rm -f)
-    (cd ${zones_src_path} && find . -type f | xargs cp -a -t ${ZONES_TMP_DIR})
-    (cd ${ZONES_TMP_DIR} && ls | xargs sha256sum | awk '{print $2":"$1}') > ${STATUS_TMP_PATH}
+    (cd ${ZONES_TMP_DIR} && find . -type f | xargs -r rm -f)
+    (cd ${zones_src_path} && find . -type f | xargs -r cp -a -t ${ZONES_TMP_DIR})
+    (cd ${ZONES_TMP_DIR} && ls | xargs -r sha256sum | awk '{print $2":"$1}') > ${STATUS_TMP_PATH}
 
     echo "detecting added/deleted/changed zones..."
 }
@@ -151,7 +153,7 @@ function update_added_zones() {
         done
     fi
 
-    cd - >/dev/null 2>&1
+    cd - >/dev/null
 }
 
 function update_deleted_zones() {
@@ -188,7 +190,7 @@ function update_changed_zones() {
         done
     fi
 
-    cd - >/dev/null 2>&1
+    cd - >/dev/null
 }
 
 function save_zones_state() {
@@ -196,7 +198,7 @@ function save_zones_state() {
         return 0
     fi
 
-    (cd ${ZONES_TMP_DIR} && ls | xargs sha256sum | awk '{print $2":"$1}') > ${STATUS_PATH}
+    (cd ${ZONES_TMP_DIR} && ls | xargs -r sha256sum | awk '{print $2":"$1}') > ${STATUS_PATH}
     rm -f ${STATUS_TMP_PATH}
 }
 
@@ -306,21 +308,32 @@ function exe_servers() {
     post_process
 }
 
-command="${1}"
-case "${command}" in
-    "all" )
-        exe_all
-        ;;
-    "update" )
-        exe_update
-        ;;
-    "servers" )
-        exe_servers
-        ;;
-    "-v" )
-        ${LIB_DIR}/nsmgmt-version.sh
-        ;;
-    * )
-        echo -ne "$(${LIB_DIR}/nsmgmt-version.sh)\n\n$(${LIB_DIR}/nsmgmt-help.sh)\n"
-        ;;
-esac
+while [ "${1}" != "" ]; do
+    case "${1}" in
+        "all" )
+            exe_all
+            exit 0
+            ;;
+        "update" )
+            exe_update
+            exit 0
+            ;;
+        "servers" )
+            exe_servers
+            exit 0
+            ;;
+        "-c" )
+            shift
+            CONFIG_PATH="${1}"
+            ;;
+        "-v" )
+            ${LIB_DIR}/nsmgmt-version.sh
+            exit 0
+            ;;
+        * )
+            echo -ne "$(${LIB_DIR}/nsmgmt-version.sh)\n\n$(${LIB_DIR}/nsmgmt-help.sh)\n"
+            exit 0
+            ;;
+    esac
+    shift
+done
