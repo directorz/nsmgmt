@@ -16,7 +16,7 @@ Requirements
 - findutils
   - find, xargs
 - coreutils
-  - cat, comm, cp, cut, ls, readlink, rm, sha256sum, sort, touch
+  - basename, cat, comm, cp, cut, dirname, ls, readlink, rm, sha256sum, sort, touch
 
 Install
 -------
