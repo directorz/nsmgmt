@@ -213,28 +213,10 @@ function run_servers_tasks() {
     local i=0
     local len=${#servers_tasks[@]}
     while [ ${i} -lt ${len} ]; do
-        . ${servers_tasks[${i}]}
-
         set +e
 
-        if type generate_config >/dev/null 2>&1; then
-            echo "[$((i + 1))] running generate_config..."
-            generate_config ${zones_dst_path}
-        fi
-
-        if type sync_config >/dev/null 2>&1; then
-            echo "[$((i + 1))] running sync_config..."
-            sync_config ${zones_dst_path}
-        fi
-
-        if type reload_ns >/dev/null 2>&1; then
-            echo "[$((i + 1))] running reload_ns..."
-            reload_ns
-        fi
-
-        unset -f generate_config
-        unset -f sync_config
-        unset -f reload_ns
+        ${servers_tasks[${i}]} ${zones_dst_path} | \
+        awk -v idx="[$((i + 1))]" '{print idx,$0;fflush()}'
 
         set -e
 
