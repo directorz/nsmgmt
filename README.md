@@ -51,15 +51,9 @@ zones_src_path | - | - | yes | ユーザが編集するゾーンファイルの�
 zones_dst_path | - | - | yes | ゾーンファイルの出力先 (絶対パスまたは nsmgmt.conf からの相対パス)
 update_serial | 0,1 | 1 | no | ゾーンファイルの出力時に SOA のシリアル値を更新するかどうか (0:しない, 1:する)
 update_serial_cmdline | - | cat | no | SOA のシリアル値を更新するためのコマンドライン (標準入力に更新前のゾーンファイルの内容が与えられる)
-servers_tasks | - | () | no | サーバ毎のタスクが定義されているファイルへのパスの配列
+tasks | - | () | no | ゾーンファイルに変更が合った場合に実行されるコマンドラインの配列 (コンフィグの生成やサーバのリロード等)
 pre_process_cmdline | - | "" | no | 処理前に実行するコマンドライン (0 以外で終了すると続く処理を行わない)
 post_process_cmdline | - | "" | no | 処理後に実行するコマンドライン
-
-### サーバ毎のタスク
-
-- 以下の Bash 関数が定義されていれば、この順で実行される
-  - generate_config, sync_config, reload_ns
-- generate_config, sync_config には、第 1 引数に zones_dst_path が与えられる
 
 Usage
 -----
