@@ -29,14 +29,14 @@ function read_global_config() {
     update_serial_cmdline=${update_serial_cmdline:="cat"}
 
     local i=0
-    local len=${#servers_tasks[@]}
+    local len=${#tasks[@]}
 
     if [ ${len} -eq 0 ]; then
-        servers_tasks=()
+        tasks=()
     fi
 
     while [ ${i} -lt ${len} ]; do
-        servers_tasks[${i}]=$(readlink -f ${servers_tasks[${i}]})
+        tasks[${i}]=$(readlink -f ${tasks[${i}]})
         i=$((i + 1))
     done
 
@@ -202,21 +202,20 @@ function save_zones_state() {
     rm -f ${STATUS_TMP_PATH}
 }
 
-function run_servers_tasks() {
+function run_tasks() {
     if [ ${NEED_UPDATE} -eq 0 ]; then
         echo "zones have not been changed"
         return 0
     else
-        echo "running servers tasks..."
+        echo "running tasks..."
     fi
 
     local i=0
-    local len=${#servers_tasks[@]}
+    local len=${#tasks[@]}
     while [ ${i} -lt ${len} ]; do
         set +e
 
-        ${servers_tasks[${i}]} ${zones_dst_path} | \
-        awk -v idx="[$((i + 1))]" '{print idx,$0;fflush()}'
+        ${tasks[${i}]} | awk -v idx="[$((i + 1))]" '{print idx,$0;fflush()}'
 
         set -e
 
@@ -257,7 +256,7 @@ function exe_all() {
     update_changed_zones
     save_zones_state
 
-    run_servers_tasks
+    run_tasks
 
     post_process
 }
@@ -279,13 +278,13 @@ function exe_update() {
     post_process
 }
 
-function exe_servers() {
+function exe_tasks() {
     read_global_config
 
     pre_process
 
     NEED_UPDATE=1
-    run_servers_tasks
+    run_tasks
 
     post_process
 }
@@ -300,8 +299,8 @@ while [ "${1}" != "" ]; do
             exe_update
             exit 0
             ;;
-        "servers" )
-            exe_servers
+        "tasks" )
+            exe_tasks
             exit 0
             ;;
         "-c" )
