@@ -4,9 +4,9 @@ zones_dst_path=/home/dns/zones_output
 update_serial=1
 update_serial_cmdline="ldns-read-zone -S 0 | ldns-read-zone -S unixtime"
 
-servers_tasks=(
-    "/path/to/primary.sh"
-    "/path/to/secondary.sh"
+tasks=(
+    "/path/to/primary.sh ${zones_dst_path}"
+    "/path/to/secondary.sh ${zones_dst_path}"
 )
 
 pre_process_cmdline=""
