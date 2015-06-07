@@ -13,7 +13,7 @@ declare CONFIG_PATH=${BIN_DIR}/../etc/nsmgmt.conf
 declare -a ADDED_ZONES
 declare -a DELETED_ZONES
 declare -a CHANGED_ZONES
-declare NEED_UPDATE=0
+declare NEED_TASKS=0
 
 function read_global_config() {
     exec 1> >(awk '{print strftime("[%Y/%m/%d %H:%M:%S]"),$0;fflush()}')
@@ -136,7 +136,7 @@ function update_added_zones() {
     local i=0
     local len=${#ADDED_ZONES[@]}
     if [ ${len} -gt 0 ]; then
-        NEED_UPDATE=1
+        NEED_TASKS=1
     fi
 
     cd ${ZONES_TMP_DIR}
@@ -160,7 +160,7 @@ function update_deleted_zones() {
     local i=0
     local len=${#DELETED_ZONES[@]}
     if [ ${len} -gt 0 ]; then
-        NEED_UPDATE=1
+        NEED_TASKS=1
     fi
 
     while [ ${i} -lt ${len} ]; do
@@ -173,7 +173,7 @@ function update_changed_zones() {
     local i=0
     local len=${#CHANGED_ZONES[@]}
     if [ ${len} -gt 0 ]; then
-        NEED_UPDATE=1
+        NEED_TASKS=1
     fi
 
     cd ${ZONES_TMP_DIR}
@@ -194,7 +194,7 @@ function update_changed_zones() {
 }
 
 function save_zones_state() {
-    if [ ${NEED_UPDATE} -eq 0 ]; then
+    if [ ${NEED_TASKS} -eq 0 ]; then
         return 0
     fi
 
@@ -203,7 +203,7 @@ function save_zones_state() {
 }
 
 function run_tasks() {
-    if [ ${NEED_UPDATE} -eq 0 ]; then
+    if [ ${NEED_TASKS} -eq 0 ]; then
         echo "zones have not been changed"
         return 0
     else
@@ -283,7 +283,7 @@ function exe_tasks() {
 
     pre_process
 
-    NEED_UPDATE=1
+    NEED_TASKS=1
     run_tasks
 
     post_process
