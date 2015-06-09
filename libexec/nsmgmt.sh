@@ -28,17 +28,10 @@ function read_global_config() {
     update_serial=${update_serial:=1}
     update_serial_cmdline=${update_serial_cmdline:="cat"}
 
-    local i=0
     local len=${#tasks[@]}
-
     if [ ${len} -eq 0 ]; then
         tasks=()
     fi
-
-    while [ ${i} -lt ${len} ]; do
-        tasks[${i}]=$(readlink -f ${tasks[${i}]})
-        i=$((i + 1))
-    done
 
     cd ${OLDPWD}
 }
@@ -210,6 +203,8 @@ function run_tasks() {
         echo "running tasks..."
     fi
 
+    cd $(dirname ${CONFIG_PATH})
+
     local i=0
     local len=${#tasks[@]}
     while [ ${i} -lt ${len} ]; do
@@ -221,6 +216,8 @@ function run_tasks() {
 
         i=$((i + 1))
     done
+
+    cd - >/dev/null
 }
 
 function post_process() {
