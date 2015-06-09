@@ -59,3 +59,8 @@ Usage
 -----
 
 - `nsmgmt -h` を参照
+
+Licence
+-------
+
+[MIT License](LICENSE)
