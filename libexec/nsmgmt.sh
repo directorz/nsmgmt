@@ -61,8 +61,7 @@ function _pre_detect() {
     [ -f ${STATUS_TMP_PATH} ] || touch ${STATUS_TMP_PATH}
     [ -d ${ZONES_TMP_DIR} ] || mkdir -p ${ZONES_TMP_DIR}
 
-    (cd ${ZONES_TMP_DIR} && find . -type f | xargs -r rm -f)
-    (cd ${zones_src_path} && find . -type f | xargs -r cp -a -t ${ZONES_TMP_DIR})
+    rsync -av ${zones_src_path}/ ${ZONES_TMP_DIR}/ 
     (cd ${ZONES_TMP_DIR} && ls | xargs -r sha256sum | awk '{print $2":"$1}') > ${STATUS_TMP_PATH}
 
     echo "detecting added/deleted/changed zones..."
