@@ -62,7 +62,11 @@ function _pre_detect() {
     [ -d ${ZONES_TMP_DIR} ] || mkdir -p ${ZONES_TMP_DIR}
 
     rsync -av --delete --exclude .git ${zones_src_path}/ ${ZONES_TMP_DIR}/ 
-    (cd ${ZONES_TMP_DIR} && ls | xargs -r sha256sum | awk '{print $2":"$1}') > ${STATUS_TMP_PATH}
+    find "${ZONES_TMP_DIR}" -maxdepth 1 \
+        -name '*:*' -prune -o -name '* *' -prune -o \
+        -type f -exec sha256sum {} + |
+    awk '{sub(/^.*\//, "", $2); print $2 ":" $1}' |
+    sort > "${STATUS_TMP_PATH}"
 
     echo "detecting added/deleted/changed zones..."
 }
