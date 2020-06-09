@@ -194,8 +194,7 @@ function save_zones_state() {
         return 0
     fi
 
-    (cd ${ZONES_TMP_DIR} && ls | xargs -r sha256sum | awk '{print $2":"$1}') > ${STATUS_PATH}
-    rm -f ${STATUS_TMP_PATH}
+    mv -f "${STATUS_TMP_PATH}" "${STATUS_PATH}"
 }
 
 function run_tasks() {
