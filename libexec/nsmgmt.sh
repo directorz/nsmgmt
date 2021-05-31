@@ -61,7 +61,7 @@ function _pre_detect() {
     [ -f ${STATUS_TMP_PATH} ] || touch ${STATUS_TMP_PATH}
     [ -d ${ZONES_TMP_DIR} ] || mkdir -p ${ZONES_TMP_DIR}
 
-    rsync -av --delete --exclude .git ${zones_src_path}/ ${ZONES_TMP_DIR}/ 
+    rsync -acv --delete --exclude .git ${zones_src_path}/ ${ZONES_TMP_DIR}/ 
     find "${ZONES_TMP_DIR}" -maxdepth 1 \
         -name '*:*' -prune -o -name '* *' -prune -o \
         -type f -exec sha256sum {} + |
