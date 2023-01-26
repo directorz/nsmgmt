@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+set -o pipefail
 
 readonly BIN_DIR=$(cd ${BASH_SOURCE[0]%/*} && pwd)
 readonly LIB_DIR=${BIN_DIR}/../libexec
@@ -135,11 +136,22 @@ function update_added_zones() {
         NEED_TASKS=1
     fi
 
+    local retval=0
+
     cd ${ZONES_TMP_DIR}
 
     if [ ${update_serial} -eq 1 ]; then
         while [ ${i} -lt ${len} ]; do
+            set +e
             cat ${ADDED_ZONES[${i}]} | eval "${update_serial_cmdline}" > ${zones_dst_path}/${ADDED_ZONES[${i}]}
+            retval=$?
+            set -e
+
+            if [ ${retval} -ne 0 ]; then
+                echo "update_serial_cmdline command for \"${ADDED_ZONES[${i}]}\" returns ${retval}"
+                exit 1
+            fi
+
             i=$((i + 1))
         done
     else
@@ -172,11 +184,22 @@ function update_changed_zones() {
         NEED_TASKS=1
     fi
 
+    local retval=0
+
     cd ${ZONES_TMP_DIR}
 
     if [ ${update_serial} -eq 1 ]; then
         while [ ${i} -lt ${len} ]; do
+            set +e
             cat ${CHANGED_ZONES[${i}]} | eval "${update_serial_cmdline}" > ${zones_dst_path}/${CHANGED_ZONES[${i}]}
+            retval=$?
+            set -e
+
+            if [ ${retval} -ne 0 ]; then
+                echo "update_serial_cmdline command for \"${CHANGED_ZONES[${i}]}\" returns ${retval}"
+                exit 1
+            fi
+
             i=$((i + 1))
         done
     else
