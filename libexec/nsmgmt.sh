@@ -234,9 +234,7 @@ function run_tasks() {
     local len=${#tasks[@]}
     while [ ${i} -lt ${len} ]; do
         set +e
-
         ${tasks[${i}]} | awk -v idx="[$((i + 1))]" '{print idx,$0;fflush()}'
-
         set -e
 
         i=$((i + 1))
