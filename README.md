@@ -50,7 +50,7 @@ Configuration
 zones_src_path | - | - | yes | ユーザが編集するゾーンファイルのディレクトリ (絶対パスまたは nsmgmt.conf からの相対パス)
 zones_dst_path | - | - | yes | ゾーンファイルの出力先 (絶対パスまたは nsmgmt.conf からの相対パス)
 update_serial | 0,1 | 1 | no | ゾーンファイルの出力時に SOA のシリアル値を更新するかどうか (0:しない, 1:する)
-update_serial_cmdline | - | cat | no | SOA のシリアル値を更新するためのコマンドライン (標準入力に更新前のゾーンファイルの内容が与えられる)
+update_serial_cmdline | - | cat | no | SOA のシリアル値を更新するためのコマンドライン (標準入力に更新前のゾーンファイルの内容が与えられる。0 以外で終了すると続く処理を行わない)
 tasks | - | () | no | ゾーンファイルに変更が合った場合に実行されるコマンドラインの配列 (コンフィグの生成やサーバのリロード等)
 pre_process_cmdline | - | "" | no | 処理前に実行するコマンドライン (0 以外で終了すると続く処理を行わない)
 post_process_cmdline | - | "" | no | 処理後に実行するコマンドライン
